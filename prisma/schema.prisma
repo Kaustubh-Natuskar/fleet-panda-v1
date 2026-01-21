@@ -1,0 +1,234 @@
+// Prisma Schema for Fleet Tracking Platform
+// Database: MySQL 8.0
+// Prisma: 6.19.2
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// MASTER DATA MODELS
+// ============================================================================
+
+/// Products that can be delivered (Diesel, Petrol, etc.)
+model Product {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(100)
+  unit      String   @default("gallons") @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  inventories Inventory[]
+  orders      Order[]
+
+  @@map("products")
+}
+
+/// Locations: Hubs (distribution centers) or Terminals (final destinations)
+model Location {
+  id        Int          @id @default(autoincrement())
+  name      String       @db.VarChar(200)
+  type      LocationType
+  address   String?      @db.VarChar(500)
+  latitude  Float?
+  longitude Float?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  // Relations
+  inventories Inventory[]
+  orders      Order[]     @relation("destination")
+
+  @@map("locations")
+}
+
+enum LocationType {
+  hub
+  terminal
+}
+
+/// Drivers who operate vehicles and perform deliveries
+model Driver {
+  id            Int      @id @default(autoincrement())
+  name          String   @db.VarChar(200)
+  phone         String?  @db.VarChar(20)
+  email         String?  @unique @db.VarChar(200)
+  licenseNumber String?  @db.VarChar(50)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  allocations VehicleAllocation[]
+  shifts      Shift[]
+  orders      Order[]
+
+  @@map("drivers")
+}
+
+/// Vehicles in the fleet
+model Vehicle {
+  id                 Int      @id @default(autoincrement())
+  registrationNumber String   @unique @db.VarChar(50)
+  fuelType           String?  @db.VarChar(50)
+  capacityGallons    Int?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Relations
+  allocations  VehicleAllocation[]
+  gpsLocations GpsLocation[]
+
+  @@map("vehicles")
+}
+
+// ============================================================================
+// OPERATIONAL MODELS
+// ============================================================================
+
+/// Inventory: Product quantities at each location
+model Inventory {
+  id              Int      @id @default(autoincrement())
+  locationId      Int
+  productId       Int
+  quantityGallons Float    @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  location Location @relation(fields: [locationId], references: [id])
+  product  Product  @relation(fields: [productId], references: [id])
+
+  // One inventory record per location-product combination
+  @@unique([locationId, productId])
+  @@map("inventories")
+}
+
+/// Vehicle Allocation: Assigns a vehicle to a driver for a specific day
+model VehicleAllocation {
+  id             Int      @id @default(autoincrement())
+  vehicleId      Int
+  driverId       Int
+  allocationDate DateTime @db.Date
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id])
+  driver  Driver  @relation(fields: [driverId], references: [id])
+  shifts  Shift[]
+
+  // A vehicle can only be allocated to one driver per day
+  @@unique([vehicleId, allocationDate])
+  // A driver can only have one vehicle per day
+  @@unique([driverId, allocationDate])
+  @@map("vehicle_allocations")
+}
+
+/// Shift: A driver's working period
+model Shift {
+  id                  Int         @id @default(autoincrement())
+  driverId            Int
+  vehicleAllocationId Int?
+  shiftDate           DateTime    @db.Date
+  status              ShiftStatus @default(scheduled)
+  startTime           DateTime?
+  endTime             DateTime?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  // Relations
+  driver             Driver             @relation(fields: [driverId], references: [id])
+  vehicleAllocation  VehicleAllocation? @relation(fields: [vehicleAllocationId], references: [id])
+  gpsLocations       GpsLocation[]
+  orderAttempts      OrderAttempt[]
+
+  // One shift per driver per day
+  @@unique([driverId, shiftDate])
+  @@map("shifts")
+}
+
+enum ShiftStatus {
+  scheduled
+  active
+  completed
+}
+
+/// Order: A delivery task
+model Order {
+  id               Int         @id @default(autoincrement())
+  destinationId    Int
+  productId        Int
+  quantityGallons  Float
+  status           OrderStatus @default(pending)
+  assignedDriverId Int?
+  assignedDate     DateTime?   @db.Date
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  // Relations
+  destination    Location       @relation("destination", fields: [destinationId], references: [id])
+  product        Product        @relation(fields: [productId], references: [id])
+  assignedDriver Driver?        @relation(fields: [assignedDriverId], references: [id])
+  attempts       OrderAttempt[]
+
+  @@index([assignedDriverId, status])
+  @@index([assignedDate])
+  @@map("orders")
+}
+
+enum OrderStatus {
+  pending
+  assigned
+  in_progress
+  completed
+  failed
+}
+
+/// Order Attempt: Records each attempt to complete an order
+model OrderAttempt {
+  id            Int           @id @default(autoincrement())
+  orderId       Int
+  shiftId       Int
+  status        AttemptStatus
+  failureReason String?       @db.VarChar(500)
+  completedAt   DateTime?
+  createdAt     DateTime      @default(now())
+
+  // Relations
+  order Order @relation(fields: [orderId], references: [id])
+  shift Shift @relation(fields: [shiftId], references: [id])
+
+  @@map("order_attempts")
+}
+
+enum AttemptStatus {
+  in_progress
+  completed
+  failed
+}
+
+/// GPS Location: Vehicle location updates
+model GpsLocation {
+  id         Int      @id @default(autoincrement())
+  vehicleId  Int
+  shiftId    Int?
+  latitude   Float
+  longitude  Float
+  recordedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  // Relations
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id])
+  shift   Shift?  @relation(fields: [shiftId], references: [id])
+
+  // Index for querying location history
+  @@index([vehicleId, recordedAt])
+  @@index([shiftId])
+  @@map("gps_locations")
+}
