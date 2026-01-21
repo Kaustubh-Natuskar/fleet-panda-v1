@@ -32,24 +32,11 @@ const parseIds = (...paramNames) => {
         }
         req.params[paramName] = parsed;
       }
+
     }
     next();
   };
 };
 
-const parseQuery = (paramNames = []) => {
-  return (req, res, next) => {
-    for (const paramName of paramNames) {
-      if (req.query[paramName]) {
-        const parsed = parseInt(req.query[paramName], 10);
-        if (isNaN(parsed) || parsed < 1) {
-          throw new BadRequestError(`Invalid ${paramName} in query: must be a positive integer`);
-        }
-        req.query[paramName] = parsed;
-      }
-    }
-    next();
-  };
-};
+module.exports = { parseId, parseIds };
 
-module.exports = { parseId, parseIds, parseQuery };

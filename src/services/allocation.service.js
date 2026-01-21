@@ -40,6 +40,8 @@ const getById = async (id) => {
 };
 
 const create = async ({ vehicleId, driverId, allocationDate }) => {
+  vehicleId = parseInt(vehicleId, 10);
+  driverId = parseInt(driverId, 10);
   // Verify vehicle and driver exist
   const [vehicle, driver] = await Promise.all([
     prisma.vehicle.findUnique({ where: { id: vehicleId } }),
@@ -174,6 +176,7 @@ const getAvailableVehicles = async (date) => {
  * Get allocation for a driver on a specific date
  */
 const getByDriverAndDate = async (driverId, date) => {
+  driverId = parseInt(driverId, 10);
   const targetDate = new Date(date);
   targetDate.setHours(0, 0, 0, 0);
 

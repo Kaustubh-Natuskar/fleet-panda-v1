@@ -13,9 +13,9 @@ const getAll = async (filters = {}) => {
   if (filters.status) {
     where.status = filters.status;
   }
-  
+
   if (filters.driverId) {
-    where.assignedDriverId = filters.driverId;
+    where.assignedDriverId = parseInt(filters.driverId);
   }
   if (filters.date) {
     where.assignedDate = new Date(filters.date);
@@ -69,6 +69,7 @@ const create = async (data) => {
 
   // If driver assigned, verify they exist
   if (data.assignedDriverId) {
+    data.assignedDriverId = parseInt(data.assignedDriverId, 10);
     const driver = await prisma.driver.findUnique({
       where: { id: data.assignedDriverId },
     });
@@ -122,6 +123,7 @@ const remove = async (id) => {
  * Assign order to a driver
  */
 const assign = async (id, { driverId, assignedDate }) => {
+  driverId = parseInt(driverId);
   const order = await getById(id);
 
   if (order.status !== 'pending' && order.status !== 'assigned') {
@@ -159,6 +161,7 @@ const assign = async (id, { driverId, assignedDate }) => {
  * Requires: active shift for driver
  */
 const startOrder = async (id, driverId) => {
+  driverId = parseInt(driverId, 10);
   const order = await getById(id);
 
   // Verify order is assigned to this driver
@@ -211,6 +214,7 @@ const startOrder = async (id, driverId) => {
  * - Increases destination inventory (atomic transaction)
  */
 const completeOrder = async (id, driverId) => {
+  driverId = parseInt(driverId, 10);
   const order = await getById(id);
 
   // Verify order is assigned to this driver
@@ -294,6 +298,7 @@ const completeOrder = async (id, driverId) => {
  * - Does NOT update inventory
  */
 const failOrder = async (id, driverId, reason) => {
+  driverId = parseInt(driverId, 10);
   const order = await getById(id);
 
   // Verify order is assigned to this driver

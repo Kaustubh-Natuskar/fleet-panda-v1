@@ -33,6 +33,7 @@ const getById = async (id) => {
 };
 
 const getByLocation = async (locationId) => {
+  locationId = parseInt(locationId);
   // Verify location exists
   const location = await prisma.location.findUnique({
     where: { id: locationId },
@@ -56,6 +57,8 @@ const getByLocation = async (locationId) => {
  * Otherwise, create new record
  */
 const upsert = async ({ locationId, productId, quantityGallons }) => {
+  locationId = parseInt(locationId, 10);
+  productId = parseInt(productId, 10);
   // Verify location and product exist
   const [location, product] = await Promise.all([
     prisma.location.findUnique({ where: { id: locationId } }),

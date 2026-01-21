@@ -73,6 +73,7 @@ const remove = async (id) => {
  * Get all shifts for a driver with vehicle and order details
  */
 const getShifts = async (driverId, status = null) => {
+  driverId = parseInt(driverId, 10);
   await getById(driverId);
 
   const where = { driverId };
@@ -134,6 +135,7 @@ const getShifts = async (driverId, status = null) => {
  * Get orders assigned to a driver
  */
 const getOrders = async (driverId, status = null) => {
+  driverId = parseInt(driverId, 10);
   await getById(driverId);
 
   const where = { assignedDriverId: driverId };

@@ -1,7 +1,7 @@
 const express = require('express');
 const orderController = require('../controllers/order.controller');
 const validate = require('../middleware/validate.middleware');
-const { parseId, parseIds, parseQuery } = require('../middleware/parseId.middleware');
+const { parseId, parseIds } = require('../middleware/parseId.middleware');
 const orderValidator = require('../validators/order.validator');
 
 const router = express.Router();
@@ -78,7 +78,7 @@ const router = express.Router();
  *       200:
  *         description: List of orders
  */
-router.get('/', parseQuery(['driverId']), validate(orderValidator.getByStatus), orderController.getAll);
+router.get('/', validate(orderValidator.getByStatus), orderController.getAll);
 
 /**
  * @swagger

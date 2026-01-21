@@ -13,6 +13,7 @@ const shiftService = require('./shift.service');
  * Requires: driver must have active shift to record location
  */
 const create = async ({ vehicleId, latitude, longitude, recordedAt }) => {
+  vehicleId = parseInt(vehicleId);
   // Verify vehicle exists
   const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
   if (!vehicle) {
@@ -56,6 +57,7 @@ const create = async ({ vehicleId, latitude, longitude, recordedAt }) => {
  * Get GPS history for a vehicle
  */
 const getByVehicle = async (vehicleId, { from, to, limit = 100 }) => {
+  vehicleId = parseInt(vehicleId, 10);
   // Verify vehicle exists
   const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
   if (!vehicle) {
@@ -87,6 +89,7 @@ const getByVehicle = async (vehicleId, { from, to, limit = 100 }) => {
  * Returns all GPS updates from this driver's shifts
  */
 const getByDriver = async (driverId, { from, to, limit = 100 }) => {
+  driverId = parseInt(driverId, 10);
   // Verify driver exists
   const driver = await prisma.driver.findUnique({ where: { id: driverId } });
   if (!driver) {
