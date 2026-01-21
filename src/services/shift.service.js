@@ -58,6 +58,7 @@ const getById = async (id) => {
  * Does NOT require allocation - that comes later from admin
  */
 const schedule = async ({ driverId, shiftDate }) => {
+  driverId = parseInt(driverId);
   // Verify driver exists
   const driver = await prisma.driver.findUnique({ where: { id: driverId } });
   if (!driver) {
@@ -100,6 +101,7 @@ const schedule = async ({ driverId, shiftDate }) => {
  * If no shift exists: create ad-hoc shift
  */
 const start = async ({ driverId }) => {
+  driverId = parseInt(driverId);
   // Verify driver exists
   const driver = await prisma.driver.findUnique({ where: { id: driverId } });
   if (!driver) {
@@ -177,6 +179,7 @@ const start = async ({ driverId }) => {
  * Requires: all orders must be completed or failed
  */
 const end = async (id, driverId) => {
+  driverId = parseInt(driverId);
   const shift = await getById(id);
 
   // Verify driver owns this shift
@@ -241,6 +244,7 @@ const getActiveShiftForDriver = async (driverId) => {
  * Get shifts by driver
  */
 const getByDriver = async (driverId, status = null) => {
+  driverId = parseInt(driverId);
   const where = { driverId };
   if (status) {
     where.status = status;
