@@ -1,80 +1,31 @@
-version: "3.8"
-
 services:
-  # Node.js Application
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: fleet-tracking-app
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=development
-      - DATABASE_URL=mysql://fleetuser:fleetpass@db:3306/fleet_tracking
-      - PORT=3000
+      NODE_ENV: production
+      DATABASE_URL: mysql://fleetuser:fleetpass@db:3306/fleet_tracking
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      # Mount source code for hot reloading
-      - .:/app
-      # Don't mount node_modules (use container's version)
-      - /app/node_modules
-    command: npm run dev
-    networks:
-      - fleet-network
 
-  # MySQL Database
   db:
     image: mysql:8.0
     container_name: fleet-tracking-db
-    ports:
-      - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=rootpassword
-      - MYSQL_DATABASE=fleet_tracking
-      - MYSQL_USER=fleetuser
-      - MYSQL_PASSWORD=fleetpass
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: fleet_tracking
+      MYSQL_USER: fleetuser
+      MYSQL_PASSWORD: fleetpass
     volumes:
-      # Persist database data
       - mysql_data:/var/lib/mysql
-      # Optional: Initialize with SQL scripts
-      - ./init-db:/docker-entrypoint-initdb.d
     healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "-u",
-          "root",
-          "-prootpassword",
-        ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
-    networks:
-      - fleet-network
-
-  # MySQL Admin UI (optional, for development)
-  adminer:
-    image: adminer
-    container_name: fleet-tracking-adminer
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-    networks:
-      - fleet-network
 
 volumes:
   mysql_data:
-    driver: local
-
-networks:
-  fleet-network:
-    driver: bridge
