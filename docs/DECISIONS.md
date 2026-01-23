@@ -702,7 +702,6 @@ Use JWT tokens with role claims. Middleware checks role before allowing access t
 
 | Improvement | Benefit |
 |-------------|---------|
-| **Idempotency Keys** | For order complete/fail operations |
 | **Retry Logic** | For inventory updates |
 | **Audit Logging** | Track all changes with user ID |
 | **Soft Deletes** | Preserve deleted records for history |
