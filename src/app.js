@@ -21,8 +21,18 @@ const fleetRoutes = require('./routes/fleet.routes');
 
 const app = express();
 
-// Security middleware
-app.use(helmet());
+// Security middleware 
+//cannot enable this as it blocks the api calls for readme and other routes
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        "upgrade-insecure-requests": null,
+      },
+    },
+  })
+);
 app.use(cors());
 
 // Request logging (skip in test environment)
@@ -38,7 +48,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(process.cwd(), 'public')));
 app.use('/docs', express.static(path.join(process.cwd(), 'docs')));
 app.get('/README.md', (req, res) => {
-    res.sendFile(path.join(process.cwd(), 'README.md'));
+  res.sendFile(path.join(process.cwd(), 'README.md'));
 });
 // --- End Documentation Frontend ---
 
