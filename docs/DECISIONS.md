@@ -260,6 +260,32 @@ model Inventory {
 
 ---
 
+### 2.8 Scalability Strategy for GPS Data
+
+**Decision:** Start with MySQL for simplicity, with a clear, phased plan to scale GPS data storage as the system grows. This acknowledges the long-term limitations of using a relational database for high-volume time-series data.
+
+**Phase 1: Initial Implementation (Current)**
+- **Strategy:** Store GPS data in a standard MySQL table (`gps_locations`).
+- **Rationale:** Simple to implement with Prisma, suitable for initial development and small-scale production. It allows the application to be functional without premature optimization.
+- **Known Limitation:** Performance will degrade significantly as the table grows into millions or billions of rows, impacting both write throughput and query latency.
+
+**Phase 2: Medium-Scale Optimization**
+- **Strategy:** Implement **Table Partitioning** on the `gps_locations` table.
+- **Partition Key:** `RANGE` partitioning on the `recordedAt` timestamp (e.g., a new partition per month).
+- **Rationale:**
+    - **Query Performance:** Queries for a vehicle's route within a specific time frame will only scan the relevant partitions, drastically reducing query time.
+    - **Data Management:** Archiving or deleting old data becomes an instantaneous `DROP PARTITION` operation, instead of a slow, row-by-row `DELETE` query.
+- **Limitation:** This optimizes a single database server but does not solve the problem of write-intensive loads eventually overwhelming a single instance (vertical scaling limit).
+
+**Phase 3: Long-Term Horizontal Scaling**
+- **Strategy:** Migrate GPS data storage to a purpose-built **Time-Series Database** or a horizontally-scalable **NoSQL Database**.
+- **Rationale:** When write throughput or advanced time-series analysis becomes the primary concern, a specialized database is required. GPS data (high-volume, simple schema, time-ordered) is a perfect fit for these systems.
+- **Recommended Candidates:**
+    - **Time-Series DB (e.g., InfluxDB, TimescaleDB):** The best fit. Purpose-built for this data type, offering superior compression, ingestion rates, and time-based analytical functions.
+    - **Wide-Column Store (e.g., Apache Cassandra):** Excellent for extreme write loads and linear scalability. A data model partitioned by `vehicleId` and clustered by `recordedAt` would be highly effective.
+
+---
+
 ## 3. API Design Decisions
 
 ### 3.1 RESTful Resource Naming
