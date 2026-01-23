@@ -27,5 +27,4 @@ COPY README.md ./
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma db push && node src/server.js"]
-# worst thing ever "npx prisma db push" must not run here!!
+CMD ["node", "src/server.js"]

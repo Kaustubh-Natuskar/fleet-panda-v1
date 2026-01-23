@@ -21,6 +21,7 @@ services:
       MYSQL_PASSWORD: fleetpass
     volumes:
       - mysql_data:/var/lib/mysql
+    command: --max_connections=100 --innodb_buffer_pool_size=256M
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
