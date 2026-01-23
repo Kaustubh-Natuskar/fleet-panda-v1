@@ -166,3 +166,190 @@ describe('API Endpoints', () => {
     expect(res.body.success).toBe(false);
   });
 });
+
+// Validation tests - these don't need a real database
+describe('Request Validation', () => {
+  describe('POST /api/orders', () => {
+    it('should reject missing required fields', async () => {
+      const res = await request(app)
+        .post('/api/orders')
+        .send({});
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('should reject negative quantity', async () => {
+      const res = await request(app)
+        .post('/api/orders')
+        .send({
+          destinationId: 1,
+          productId: 1,
+          quantity: -100,
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toMatch(/quantity/i);
+    });
+
+    it('should reject invalid destinationId type', async () => {
+      const res = await request(app)
+        .post('/api/orders')
+        .send({
+          destinationId: 'invalid',
+          productId: 1,
+          quantity: 1000,
+        });
+
+      expect(res.status).toBe(400);
+    });
+  });
+
+  describe('POST /api/allocations', () => {
+    it('should reject missing vehicleId', async () => {
+      const res = await request(app)
+        .post('/api/allocations')
+        .send({
+          driverId: 1,
+          allocationDate: '2026-01-25',
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toMatch(/vehicleId/i);
+    });
+
+    it('should reject invalid date format', async () => {
+      const res = await request(app)
+        .post('/api/allocations')
+        .send({
+          vehicleId: 1,
+          driverId: 1,
+          allocationDate: 'not-a-date',
+        });
+
+      expect(res.status).toBe(400);
+    });
+  });
+
+  describe('POST /api/shifts/start', () => {
+    it('should reject missing driverId', async () => {
+      const res = await request(app)
+        .post('/api/shifts/start')
+        .send({});
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toMatch(/driverId/i);
+    });
+  });
+
+  describe('POST /api/gps', () => {
+    it('should reject missing coordinates', async () => {
+      const res = await request(app)
+        .post('/api/gps')
+        .send({
+          vehicleId: 1,
+        });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('should reject invalid latitude range', async () => {
+      const res = await request(app)
+        .post('/api/gps')
+        .send({
+          vehicleId: 1,
+          latitude: 100, // Invalid: must be -90 to 90
+          longitude: -95.3698,
+        });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('should reject invalid longitude range', async () => {
+      const res = await request(app)
+        .post('/api/gps')
+        .send({
+          vehicleId: 1,
+          latitude: 29.7604,
+          longitude: 200, // Invalid: must be -180 to 180
+        });
+
+      expect(res.status).toBe(400);
+    });
+  });
+
+  describe('POST /api/drivers', () => {
+    it('should reject empty name', async () => {
+      const res = await request(app)
+        .post('/api/drivers')
+        .send({
+          name: '',
+          licenseNumber: 'TX-12345',
+        });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('should reject invalid email format', async () => {
+      const res = await request(app)
+        .post('/api/drivers')
+        .send({
+          name: 'John Smith',
+          email: 'not-an-email',
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toMatch(/email/i);
+    });
+  });
+
+  describe('POST /api/vehicles', () => {
+    it('should reject missing registrationNumber', async () => {
+      const res = await request(app)
+        .post('/api/vehicles')
+        .send({
+          model: 'Tanker Truck',
+        });
+
+      expect(res.status).toBe(400);
+    });
+  });
+});
+
+// ID parameter validation tests
+describe('ID Parameter Validation', () => {
+  it('should reject non-numeric ID for GET /api/orders/:id', async () => {
+    const res = await request(app).get('/api/orders/invalid');
+    expect(res.status).toBe(400);
+    expect(res.body.error.message).toMatch(/invalid/i);
+  });
+
+  it('should reject negative ID for GET /api/drivers/:id', async () => {
+    const res = await request(app).get('/api/drivers/-1');
+    expect(res.status).toBe(400);
+  });
+
+  it('should reject zero ID for GET /api/vehicles/:id', async () => {
+    const res = await request(app).get('/api/vehicles/0');
+    expect(res.status).toBe(400);
+  });
+
+  it('should reject non-numeric ID for DELETE /api/allocations/:id', async () => {
+    const res = await request(app).delete('/api/allocations/abc');
+    expect(res.status).toBe(400);
+  });
+});
+
+// JSON parsing error test
+describe('JSON Error Handling', () => {
+  it('should return 400 for invalid JSON body', async () => {
+    const res = await request(app)
+      .post('/api/orders')
+      .set('Content-Type', 'application/json')
+      .send('{ invalid json }');
+
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('INVALID_JSON');
+  });
+});
