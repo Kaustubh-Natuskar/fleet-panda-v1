@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express');
 const orderController = require('../controllers/order.controller');
 const validate = require('../middleware/validate.middleware');

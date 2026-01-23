@@ -1,3 +1,5 @@
+'use strict';
+
 const Joi = require('joi');
 
 // Custom validation for date (must be today or future)

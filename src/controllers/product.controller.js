@@ -1,3 +1,5 @@
+'use strict';
+
 const productService = require('../services/product.service');
 const { success, created, noContent } = require('../utils/response');
 

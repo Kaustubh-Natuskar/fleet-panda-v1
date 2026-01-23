@@ -1,3 +1,5 @@
+'use strict';
+
 const shiftService = require('../services/shift.service');
 const { success, created } = require('../utils/response');
 

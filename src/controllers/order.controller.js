@@ -1,3 +1,5 @@
+'use strict';
+
 const orderService = require('../services/order.service');
 const { success, created, noContent } = require('../utils/response');
 

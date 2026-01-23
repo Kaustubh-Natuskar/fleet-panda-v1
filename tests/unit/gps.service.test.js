@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Unit Tests for GPS Service
  * Tests that GPS requires active shift

@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express');
 const inventoryController = require('../controllers/inventory.controller');
 const validate = require('../middleware/validate.middleware');

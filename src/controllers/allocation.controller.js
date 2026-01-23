@@ -1,3 +1,5 @@
+'use strict';
+
 const allocationService = require('../services/allocation.service');
 const { success, created, noContent } = require('../utils/response');
 

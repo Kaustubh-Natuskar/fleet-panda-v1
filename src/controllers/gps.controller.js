@@ -1,3 +1,5 @@
+'use strict';
+
 const gpsService = require('../services/gps.service');
 const { success, created } = require('../utils/response');
 

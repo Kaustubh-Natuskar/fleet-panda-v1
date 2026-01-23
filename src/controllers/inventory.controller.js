@@ -1,3 +1,5 @@
+'use strict';
+
 const inventoryService = require('../services/inventory.service');
 const { success, created } = require('../utils/response');
 

@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express');
 const vehicleController = require('../controllers/vehicle.controller');
 const validate = require('../middleware/validate.middleware');

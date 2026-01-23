@@ -1,3 +1,5 @@
+'use strict';
+
 const prisma = require('../utils/prisma');
 const { NotFoundError, ValidationError } = require('../utils/errors');
 

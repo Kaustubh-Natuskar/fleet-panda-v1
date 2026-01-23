@@ -1,3 +1,5 @@
+'use strict';
+
 const driverService = require('../services/driver.service');
 const { success, created, noContent } = require('../utils/response');
 

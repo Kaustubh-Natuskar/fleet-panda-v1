@@ -1,3 +1,5 @@
+'use strict';
+
 const swaggerJsdoc = require('swagger-jsdoc');
 
 const options = {

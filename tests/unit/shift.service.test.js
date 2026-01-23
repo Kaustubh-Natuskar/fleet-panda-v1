@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Unit Tests for Shift Service
  * Tests critical business logic for shift lifecycle

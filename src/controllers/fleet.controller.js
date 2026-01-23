@@ -1,3 +1,5 @@
+'use strict';
+
 const fleetService = require('../services/fleet.service');
 const { success } = require('../utils/response');
 

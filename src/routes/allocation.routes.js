@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express');
 const allocationController = require('../controllers/allocation.controller');
 const validate = require('../middleware/validate.middleware');

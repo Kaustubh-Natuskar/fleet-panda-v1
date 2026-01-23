@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express');
 const shiftController = require('../controllers/shift.controller');
 const validate = require('../middleware/validate.middleware');

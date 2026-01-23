@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Integration Test - Full Delivery Workflow
  *

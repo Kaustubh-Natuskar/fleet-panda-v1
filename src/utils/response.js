@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Standardized API Response Helpers
  * Ensures consistent response format across all endpoints

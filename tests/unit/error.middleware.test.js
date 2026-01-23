@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Unit Tests for Error Middleware
  * Tests error handling and response formatting

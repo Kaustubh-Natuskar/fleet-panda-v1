@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Unit Tests for Allocation Service
  * Tests vehicle and driver allocation constraints

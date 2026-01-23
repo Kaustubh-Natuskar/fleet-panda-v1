@@ -1,3 +1,5 @@
+'use strict';
+
 const app = require('./app');
 const prisma = require('./utils/prisma');
 

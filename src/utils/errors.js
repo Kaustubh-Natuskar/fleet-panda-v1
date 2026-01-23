@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Custom Error Classes for Fleet Tracking API
  * Provides consistent error handling across the application

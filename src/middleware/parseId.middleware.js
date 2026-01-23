@@ -1,3 +1,5 @@
+'use strict';
+
 const { BadRequestError } = require('../utils/errors');
 
 /**

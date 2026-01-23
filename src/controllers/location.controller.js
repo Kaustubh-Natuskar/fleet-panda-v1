@@ -1,3 +1,5 @@
+'use strict';
+
 const locationService = require('../services/location.service');
 const { success, created, noContent } = require('../utils/response');
 

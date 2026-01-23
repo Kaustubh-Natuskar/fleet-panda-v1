@@ -1,3 +1,5 @@
+'use strict';
+
 const prisma = require('../utils/prisma');
 const { NotFoundError, BadRequestError } = require('../utils/errors');
 const shiftService = require('./shift.service');

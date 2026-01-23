@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Unit Tests for Order Controller
  * Tests HTTP layer - request handling and response formatting

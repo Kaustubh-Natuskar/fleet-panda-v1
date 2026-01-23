@@ -1,3 +1,5 @@
+'use strict';
+
 const vehicleService = require('../services/vehicle.service');
 const { success, created, noContent } = require('../utils/response');
 

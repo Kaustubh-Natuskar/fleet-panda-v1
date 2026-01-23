@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express');
 const gpsController = require('../controllers/gps.controller');
 const validate = require('../middleware/validate.middleware');

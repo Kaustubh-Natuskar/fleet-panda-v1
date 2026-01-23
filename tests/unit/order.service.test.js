@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Unit Tests for Order Service
  * Tests critical business logic for order lifecycle

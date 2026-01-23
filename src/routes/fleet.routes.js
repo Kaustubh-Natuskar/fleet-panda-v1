@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express');
 const fleetController = require('../controllers/fleet.controller');
 

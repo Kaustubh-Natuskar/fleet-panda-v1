@@ -1,3 +1,5 @@
+'use strict';
+
 const prisma = require('../utils/prisma');
 const { NotFoundError, ConflictError, BadRequestError } = require('../utils/errors');
 const allocationService = require('./allocation.service');
