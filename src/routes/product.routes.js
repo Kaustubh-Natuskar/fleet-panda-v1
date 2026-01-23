@@ -19,9 +19,6 @@ const router = express.Router();
  *         name:
  *           type: string
  *           example: Diesel
- *         unit:
- *           type: string
- *           example: gallons
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -102,9 +99,6 @@ router.get('/:id', parseId(), productController.getById);
  *               name:
  *                 type: string
  *                 example: Premium Diesel
- *               unit:
- *                 type: string
- *                 example: gallons
  *     responses:
  *       201:
  *         description: Product created
@@ -135,8 +129,6 @@ router.post('/', validate(productValidator.create), productController.create);
  *             type: object
  *             properties:
  *               name:
- *                 type: string
- *               unit:
  *                 type: string
  *     responses:
  *       200:
