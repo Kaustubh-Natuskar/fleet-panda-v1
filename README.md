@@ -40,9 +40,9 @@ docker-compose logs -f app
 
 | Service            | URL                            |
 | ------------------ | ------------------------------ |
-| API                | http://localhost:3000          |
-| API Docs (Swagger) | http://localhost:3000/api-docs |
-| Health Check       | http://localhost:3000/health   |
+| API                | http://base-url:3000          |
+| API Docs (Swagger) | http://base-url:3000/api-docs |
+| Health Check       | http://base-url:3000/health   |
 
 ## API Overview
 
@@ -121,32 +121,32 @@ pending → assigned → in_progress → completed
 
 ```bash
 # 1. Admin allocates vehicle to driver for today
-curl -X POST http://localhost:3000/api/allocations \
+curl -X POST http://base-url:3000/api/allocations \
   -H "Content-Type: application/json" \
   -d '{"vehicleId": 1, "driverId": 1, "allocationDate": "2026-01-21"}'
 
 # 2. Admin creates order and assigns to driver
-curl -X POST http://localhost:3000/api/orders \
+curl -X POST http://base-url:3000/api/orders \
   -H "Content-Type: application/json" \
   -d '{"destinationId": 3, "productId": 1, "quantity": 5000, "assignedDriverId": 1, "assignedDate": "2026-01-21"}'
 
 # 3. Driver starts shift
-curl -X POST http://localhost:3000/api/shifts/start \
+curl -X POST http://base-url:3000/api/shifts/start \
   -H "Content-Type: application/json" \
   -d '{"driverId": 1}'
 
 # 4. Driver starts order
-curl -X POST http://localhost:3000/api/orders/1/start \
+curl -X POST http://base-url:3000/api/orders/1/start \
   -H "Content-Type: application/json" \
   -d '{"driverId": 1}'
 
 # 5. Driver completes order
-curl -X POST http://localhost:3000/api/orders/1/complete \
+curl -X POST http://base-url:3000/api/orders/1/complete \
   -H "Content-Type: application/json" \
   -d '{"driverId": 1}'
 
 # 6. Driver ends shift
-curl -X POST http://localhost:3000/api/shifts/1/end \
+curl -X POST http://base-url:3000/api/shifts/1/end \
   -H "Content-Type: application/json" \
   -d '{"driverId": 1}'
 ```
@@ -245,14 +245,4 @@ npm test -- --coverage
 | 409  | Conflict (duplicate, constraint violation) |
 | 500  | Server error                               |
 
-## Environment Variables
 
-| Variable         | Description             | Default     |
-| ---------------- | ----------------------- | ----------- |
-| `PORT`         | Server port             | 3000        |
-| `NODE_ENV`     | Environment             | development |
-| `DATABASE_URL` | MySQL connection string | -           |
-
-## License
-
-ISC

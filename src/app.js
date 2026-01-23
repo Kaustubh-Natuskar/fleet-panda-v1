@@ -5,9 +5,7 @@ const morgan = require('morgan');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 const errorMiddleware = require('./middleware/error.middleware');
-const fs = require('fs').promises;
 const path = require('path');
-const { marked } = require('marked');
 
 // Import routes
 const productRoutes = require('./routes/product.routes');
@@ -36,6 +34,14 @@ if (process.env.NODE_ENV !== 'test') {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// --- Documentation Frontend ---
+app.use(express.static(path.join(process.cwd(), 'public')));
+app.use('/docs', express.static(path.join(process.cwd(), 'docs')));
+app.get('/README.md', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'README.md'));
+});
+// --- End Documentation Frontend ---
+
 // Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customCss: '.swagger-ui .topbar { display: none }',
@@ -49,18 +55,6 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
   });
-});
-
-// Readme route
-app.get('/readme', async (req, res, next) => {
-  try {
-    const readmePath = path.join(process.cwd(), 'README.md');
-    const markdown = await fs.readFile(readmePath, 'utf8');
-    const html = marked(`<body style="display: flex; justify-content: center; align-items: center; flex-direction: column;">${markdown}</body>`);
-    res.send(html);
-  } catch (error) {
-    next(error);
-  }
 });
 
 // API Routes

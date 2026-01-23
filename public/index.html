@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FuelPandaV2 Documentation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+        }
+        #sidebar {
+            width: 250px;
+            background: #f4f4f4;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+        }
+        #sidebar h1 {
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        #sidebar nav ul {
+            list-style: none;
+            padding: 0;
+        }
+        #sidebar nav li {
+            margin-bottom: 10px;
+        }
+        #sidebar nav a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #sidebar nav a:hover {
+            text-decoration: underline;
+        }
+        #content {
+            flex-grow: 1;
+            padding: 20px 40px;
+            overflow-y: auto;
+        }
+        /* Markdown styles */
+        #content h1, #content h2, #content h3 {
+            border-bottom: 1px solid #eaecef;
+            padding-bottom: 0.3em;
+        }
+        #content code {
+            background-color: #f6f8fa;
+            border-radius: 3px;
+            padding: 0.2em 0.4em;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+        }
+        #content pre {
+            background-color: #f6f8fa;
+            border-radius: 3px;
+            padding: 16px;
+            overflow: auto;
+        }
+        #content pre code {
+            padding: 0;
+        }
+        #content table {
+            border-collapse: collapse;
+        }
+        #content th, #content td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        #content th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h1>FuelPandaV2</h1>
+        <nav>
+            <ul>
+                <li><a href="#" data-file="/README.md">README.md</a></li>
+                <li><a href="#" data-file="/docs/DATABASE.md">DATABASE.md</a></li>
+                <li><a href="#" data-file="/docs/DECISIONS.md">DECISIONS.md</a></li>
+                <li><a href="/api-docs" target="_blank">API Docs (Swagger)</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div id="content">
+        Loading...
+    </div>
+
+    <script src="/marked.min.js"></script>
+    <script src="/main.js"></script>
+</body>
+</html>
