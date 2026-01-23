@@ -15,7 +15,7 @@
  */
 
 const request = require('supertest');
-const app = require('../src/app');
+const app = require('../../src/app.js');
 
 // Skip integration tests if DATABASE_URL is not set
 const runIntegration = process.env.DATABASE_URL && process.env.RUN_INTEGRATION === 'true';
@@ -74,7 +74,7 @@ describeOrSkip('Integration: Full Delivery Workflow', () => {
       .send({
         destinationId,
         productId,
-        quantityGallons: 1000,
+        quantity: 1000,
         assignedDriverId: driverId,
         assignedDate: today,
       });

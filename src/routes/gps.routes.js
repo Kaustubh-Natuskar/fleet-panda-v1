@@ -123,13 +123,6 @@ router.post('/', validate(gpsValidator.create), gpsController.create);
  *           type: string
  *           format: date-time
  *         description: End of time range
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 100
- *           maximum: 1000
- *         description: Max records to return
  *     responses:
  *       200:
  *         description: GPS location history
@@ -172,12 +165,6 @@ router.get('/vehicle/:vehicleId', parseIds('vehicleId'), validate(gpsValidator.g
  *         schema:
  *           type: string
  *           format: date-time
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 100
- *           maximum: 1000
  *     responses:
  *       200:
  *         description: GPS location history for driver's shifts

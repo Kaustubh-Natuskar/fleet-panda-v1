@@ -128,7 +128,7 @@ curl -X POST http://localhost:3000/api/allocations \
 # 2. Admin creates order and assigns to driver
 curl -X POST http://localhost:3000/api/orders \
   -H "Content-Type: application/json" \
-  -d '{"destinationId": 3, "productId": 1, "quantityGallons": 5000, "assignedDriverId": 1, "assignedDate": "2026-01-21"}'
+  -d '{"destinationId": 3, "productId": 1, "quantity": 5000, "assignedDriverId": 1, "assignedDate": "2026-01-21"}'
 
 # 3. Driver starts shift
 curl -X POST http://localhost:3000/api/shifts/start \

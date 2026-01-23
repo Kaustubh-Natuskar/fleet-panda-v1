@@ -18,6 +18,9 @@ RUN npx prisma generate
 # Production stage
 FROM node:20-slim
 
+## need open ssl in both builder and actual build stage
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # Copy from builder

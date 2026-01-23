@@ -61,7 +61,7 @@ describe('Order Service', () => {
         id: 1,
         destinationId: 3,
         productId: 1,
-        quantityGallons: 5000,
+        quantity: 5000,
         status: 'in_progress',
         assignedDriverId: 1,
       };
@@ -92,7 +92,7 @@ describe('Order Service', () => {
           update: jest.fn().mockResolvedValue({ ...mockAttempt, status: 'completed' }),
         },
         inventory: {
-          upsert: jest.fn().mockResolvedValue({ quantityGallons: 5000 }),
+          upsert: jest.fn().mockResolvedValue({ quantity: 5000 }),
         },
       };
       prisma.$transaction.mockImplementation((callback) => callback(mockTx));
@@ -103,7 +103,7 @@ describe('Order Service', () => {
       expect(mockTx.inventory.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
           update: {
-            quantityGallons: { increment: 5000 },
+            quantity: { increment: 5000 },
           },
         })
       );
@@ -153,7 +153,7 @@ describe('Order Service', () => {
         id: 1,
         destinationId: 3,
         productId: 1,
-        quantityGallons: 5000,
+        quantity: 5000,
         status: 'in_progress',
         assignedDriverId: 1,
       };

@@ -291,7 +291,7 @@ return prisma.$transaction(async (tx) => {
   // Increase inventory
   await tx.inventory.upsert({
     where: { locationId_productId: { ... } },
-    update: { quantityGallons: { increment: order.quantityGallons } },
+    update: { quantity: { increment: order.quantity } },
     create: { ... },
   });
 

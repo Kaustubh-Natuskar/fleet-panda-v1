@@ -67,16 +67,16 @@ const getStatus = async () => {
         },
         location: latestGps
           ? {
-              latitude: latestGps.latitude,
-              longitude: latestGps.longitude,
-              recordedAt: latestGps.recordedAt,
-            }
+            latitude: latestGps.latitude,
+            longitude: latestGps.longitude,
+            recordedAt: latestGps.recordedAt,
+          }
           : null,
         currentOrders: currentOrders.map((order) => ({
           id: order.id,
           destination: order.destination.name,
           product: order.product.name,
-          quantityGallons: order.quantityGallons,
+          quantity: order.quantity,
           status: order.status,
         })),
       };

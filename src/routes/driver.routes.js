@@ -147,7 +147,7 @@ router.get('/:id', parseId(), driverController.getById);
  *                               type: object
  *                             product:
  *                               type: object
- *                             quantityGallons:
+ *                             quantity:
  *                               type: number
  *                             status:
  *                               type: string

@@ -22,7 +22,7 @@ const router = express.Router();
  *         productId:
  *           type: integer
  *           example: 1
- *         quantityGallons:
+ *         quantity:
  *           type: number
  *           example: 5000
  *         status:
@@ -115,7 +115,7 @@ router.get('/:id', parseId(), orderController.getById);
  *             required:
  *               - destinationId
  *               - productId
- *               - quantityGallons
+ *               - quantity
  *             properties:
  *               destinationId:
  *                 type: integer
@@ -124,7 +124,7 @@ router.get('/:id', parseId(), orderController.getById);
  *               productId:
  *                 type: integer
  *                 example: 1
- *               quantityGallons:
+ *               quantity:
  *                 type: number
  *                 example: 5000
  *               assignedDriverId:
@@ -167,7 +167,7 @@ router.post('/', validate(orderValidator.create), orderController.create);
  *                 type: integer
  *               productId:
  *                 type: integer
- *               quantityGallons:
+ *               quantity:
  *                 type: number
  *               status:
  *                 type: string

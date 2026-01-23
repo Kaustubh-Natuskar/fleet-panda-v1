@@ -45,7 +45,7 @@ const update = async (id, data) => {
     });
   } catch (error) {
     if (error.code === 'P2002') {
-      throw new ConflictError(`Driver with email '${data.email}' already exists`);
+      throw new ConflictError(`Driver with license number '${data.licenseNumber}' already exists`);
     }
     throw error;
   }
@@ -73,7 +73,7 @@ const remove = async (id) => {
  * Get all shifts for a driver with vehicle and order details
  */
 const getShifts = async (driverId, status = null) => {
-  driverId = parseInt(driverId, 10);
+  driverId = parseInt(driverId);
   await getById(driverId);
 
   const where = { driverId };
@@ -123,7 +123,7 @@ const getShifts = async (driverId, status = null) => {
         id: attempt.order.product.id,
         name: attempt.order.product.name,
       },
-      quantityGallons: attempt.order.quantityGallons,
+      quantity: attempt.order.quantity,
       status: attempt.status,
       failureReason: attempt.failureReason,
       completedAt: attempt.completedAt,

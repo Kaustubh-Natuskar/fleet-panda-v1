@@ -21,9 +21,9 @@ async function main() {
   // PRODUCTS
   // ============================================================================
   const products = await Promise.all([
-    prisma.product.create({ data: { name: 'Diesel', unit: 'gallons' } }),
-    prisma.product.create({ data: { name: 'Petrol', unit: 'gallons' } }),
-    prisma.product.create({ data: { name: 'Premium Petrol', unit: 'gallons' } }),
+    prisma.product.create({ data: { name: 'Diesel' } }),
+    prisma.product.create({ data: { name: 'Petrol' } }),
+    prisma.product.create({ data: { name: 'Premium Petrol' } }),
   ]);
   console.log(`✅ Created ${products.length} products`);
   products.forEach(p => console.log(`   - [${p.id}] ${p.name}`));
@@ -122,28 +122,24 @@ async function main() {
     prisma.vehicle.create({
       data: {
         registrationNumber: 'TX-FP-001',
-        fuelType: 'diesel',
         capacityGallons: 8000,
       },
     }),
     prisma.vehicle.create({
       data: {
         registrationNumber: 'TX-FP-002',
-        fuelType: 'diesel',
         capacityGallons: 8000,
       },
     }),
     prisma.vehicle.create({
       data: {
         registrationNumber: 'TX-FP-003',
-        fuelType: 'diesel',
         capacityGallons: 5000,
       },
     }),
     prisma.vehicle.create({
       data: {
         registrationNumber: 'TX-FP-004',
-        fuelType: 'diesel',
         capacityGallons: 10000,
       },
     }),
@@ -157,24 +153,24 @@ async function main() {
   const inventories = await Promise.all([
     // Central Hub inventory
     prisma.inventory.create({
-      data: { locationId: locations[0].id, productId: products[0].id, quantityGallons: 50000 },
+      data: { locationId: locations[0].id, productId: products[0].id, quantity: 50000 },
     }),
     prisma.inventory.create({
-      data: { locationId: locations[0].id, productId: products[1].id, quantityGallons: 30000 },
+      data: { locationId: locations[0].id, productId: products[1].id, quantity: 30000 },
     }),
     prisma.inventory.create({
-      data: { locationId: locations[0].id, productId: products[2].id, quantityGallons: 15000 },
+      data: { locationId: locations[0].id, productId: products[2].id, quantity: 15000 },
     }),
     // North Hub inventory
     prisma.inventory.create({
-      data: { locationId: locations[1].id, productId: products[0].id, quantityGallons: 40000 },
+      data: { locationId: locations[1].id, productId: products[0].id, quantity: 40000 },
     }),
     prisma.inventory.create({
-      data: { locationId: locations[1].id, productId: products[1].id, quantityGallons: 25000 },
+      data: { locationId: locations[1].id, productId: products[1].id, quantity: 25000 },
     }),
     // Terminal A - some existing inventory
     prisma.inventory.create({
-      data: { locationId: locations[2].id, productId: products[0].id, quantityGallons: 5000 },
+      data: { locationId: locations[2].id, productId: products[0].id, quantity: 5000 },
     }),
   ]);
   console.log(`\n✅ Created ${inventories.length} inventory records`);
@@ -202,14 +198,14 @@ async function main() {
     data: {
       destinationId: locations[2].id, // Terminal A
       productId: products[0].id, // Diesel
-      quantityGallons: 5000,
+      quantity: 5000,
       status: 'assigned',
       assignedDriverId: drivers[0].id,
       assignedDate: today,
     },
   });
   console.log(`\n✅ Created sample order`);
-  console.log(`   - [${order.id}] ${order.quantityGallons} gal to ${locations[2].name}`);
+  console.log(`   - [${order.id}] ${order.quantity} gal to ${locations[2].name}`);
 
   // ============================================================================
   // SUMMARY

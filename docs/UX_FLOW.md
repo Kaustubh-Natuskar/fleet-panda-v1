@@ -29,7 +29,7 @@ This document describes the user experience flows for different actors in the sy
 │                                                                      │
 │  3. Set Initial Inventory at Hubs                                    │
 │     POST /api/inventory                                              │
-│     {"locationId": 1, "productId": 1, "quantityGallons": 50000}     │
+│     {"locationId": 1, "productId": 1, "quantity": 50000}     │
 │                                                                      │
 │  4. Create Drivers                                                   │
 │     POST /api/drivers                                                │
@@ -74,7 +74,7 @@ This document describes the user experience flows for different actors in the sy
 │     {                                                                │
 │       "destinationId": 3,         // Terminal ID                    │
 │       "productId": 1,             // Diesel                         │
-│       "quantityGallons": 5000,                                      │
+│       "quantity": 5000,                                      │
 │       "assignedDriverId": 1,      // Optional: assign immediately   │
 │       "assignedDate": "2026-01-21"                                  │
 │     }                                                                │
@@ -279,7 +279,7 @@ This document describes the user experience flows for different actors in the sy
 │          "id": 5,                                                   │
 │          "destination": {"name": "Terminal A"},                    │
 │          "product": {"name": "Diesel"},                            │
-│          "quantityGallons": 5000,                                  │
+│          "quantity": 5000,                                  │
 │          "status": "completed",                                    │
 │          "failureReason": null                                     │
 │        },                                                           │

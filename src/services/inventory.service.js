@@ -56,7 +56,7 @@ const getByLocation = async (locationId) => {
  * If inventory exists for location+product, update quantity
  * Otherwise, create new record
  */
-const upsert = async ({ locationId, productId, quantityGallons }) => {
+const upsert = async ({ locationId, productId, quantity }) => {
   locationId = parseInt(locationId, 10);
   productId = parseInt(productId, 10);
   // Verify location and product exist
@@ -76,8 +76,8 @@ const upsert = async ({ locationId, productId, quantityGallons }) => {
     where: {
       locationId_productId: { locationId, productId },
     },
-    update: { quantityGallons },
-    create: { locationId, productId, quantityGallons },
+    update: { quantity },
+    create: { locationId, productId, quantity },
     include: {
       location: true,
       product: true,
@@ -91,7 +91,7 @@ const upsert = async ({ locationId, productId, quantityGallons }) => {
 const adjust = async (id, adjustment, reason = null) => {
   const inventory = await getById(id);
 
-  const newQuantity = inventory.quantityGallons + adjustment;
+  const newQuantity = inventory.quantity + adjustment;
   if (newQuantity < 0) {
     throw new ValidationError(
       `Cannot adjust: would result in negative quantity (${newQuantity})`
@@ -107,7 +107,7 @@ const adjust = async (id, adjustment, reason = null) => {
 
   return prisma.inventory.update({
     where: { id },
-    data: { quantityGallons: newQuantity },
+    data: { quantity: newQuantity },
     include: {
       location: true,
       product: true,
@@ -124,12 +124,12 @@ const increaseByLocationAndProduct = async (locationId, productId, quantity) => 
       locationId_productId: { locationId, productId },
     },
     update: {
-      quantityGallons: { increment: quantity },
+      quantity: { increment: quantity },
     },
     create: {
       locationId,
       productId,
-      quantityGallons: quantity,
+      quantity: quantity,
     },
   });
 };

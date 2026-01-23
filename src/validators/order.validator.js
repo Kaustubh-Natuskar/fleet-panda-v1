@@ -4,7 +4,7 @@ const create = {
   body: Joi.object({
     destinationId: Joi.number().integer().positive().required(),
     productId: Joi.number().integer().positive().required(),
-    quantityGallons: Joi.number().positive().required(),
+    quantity: Joi.number().positive().required(),
     assignedDriverId: Joi.number().integer().positive().allow(null),
     assignedDate: Joi.date().iso().allow(null),
   }),
@@ -17,7 +17,7 @@ const update = {
   body: Joi.object({
     destinationId: Joi.number().integer().positive(),
     productId: Joi.number().integer().positive(),
-    quantityGallons: Joi.number().positive(),
+    quantity: Joi.number().positive(),
     status: Joi.string().valid('pending', 'assigned', 'in_progress', 'completed', 'failed'),
   }).min(1),
 };

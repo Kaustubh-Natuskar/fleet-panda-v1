@@ -278,12 +278,12 @@ const completeOrder = async (id, driverId) => {
         },
       },
       update: {
-        quantityGallons: { increment: order.quantityGallons },
+        quantity: { increment: order.quantity },
       },
       create: {
         locationId: order.destinationId,
         productId: order.productId,
-        quantityGallons: order.quantityGallons,
+        quantity: order.quantity,
       },
     });
 

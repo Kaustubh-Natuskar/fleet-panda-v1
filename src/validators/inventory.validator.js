@@ -4,7 +4,7 @@ const upsert = {
   body: Joi.object({
     locationId: Joi.number().integer().positive().required(),
     productId: Joi.number().integer().positive().required(),
-    quantityGallons: Joi.number().min(0).required(),
+    quantity: Joi.number().min(0).required(),
   }),
 };
 

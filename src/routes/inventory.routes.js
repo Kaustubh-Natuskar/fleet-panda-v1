@@ -22,7 +22,7 @@ const router = express.Router();
  *         productId:
  *           type: integer
  *           example: 1
- *         quantityGallons:
+ *         quantity:
  *           type: number
  *           example: 50000
  *         location:
@@ -117,7 +117,7 @@ router.get('/:id', parseId(), inventoryController.getById);
  *             required:
  *               - locationId
  *               - productId
- *               - quantityGallons
+ *               - quantity
  *             properties:
  *               locationId:
  *                 type: integer
@@ -125,7 +125,7 @@ router.get('/:id', parseId(), inventoryController.getById);
  *               productId:
  *                 type: integer
  *                 example: 1
- *               quantityGallons:
+ *               quantity:
  *                 type: number
  *                 example: 50000
  *     responses:

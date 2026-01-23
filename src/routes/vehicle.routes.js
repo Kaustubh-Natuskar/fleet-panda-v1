@@ -19,9 +19,6 @@ const router = express.Router();
  *         registrationNumber:
  *           type: string
  *           example: TX-FP-001
- *         fuelType:
- *           type: string
- *           example: diesel
  *         capacityGallons:
  *           type: integer
  *           example: 8000
@@ -94,9 +91,6 @@ router.get('/:id', parseId(), vehicleController.getById);
  *               registrationNumber:
  *                 type: string
  *                 example: TX-FP-005
- *               fuelType:
- *                 type: string
- *                 example: diesel
  *               capacityGallons:
  *                 type: integer
  *                 example: 10000
@@ -130,8 +124,6 @@ router.post('/', validate(vehicleValidator.create), vehicleController.create);
  *             type: object
  *             properties:
  *               registrationNumber:
- *                 type: string
- *               fuelType:
  *                 type: string
  *               capacityGallons:
  *                 type: integer

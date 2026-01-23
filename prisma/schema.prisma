@@ -19,7 +19,7 @@ datasource db {
 model Product {
   id        Int      @id @default(autoincrement())
   name      String   @unique @db.VarChar(100)
-  unit      String   @default("gallons") @db.VarChar(50)
+  //unit      String   @default("gallons") @db.VarChar(50) //removing this not required
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -58,8 +58,8 @@ model Driver {
   id            Int      @id @default(autoincrement())
   name          String   @db.VarChar(200)
   phone         String?  @db.VarChar(20)
-  email         String?  @unique @db.VarChar(200)
-  licenseNumber String?  @db.VarChar(50)
+  email         String?  @db.VarChar(200)
+  licenseNumber String?  @unique @db.VarChar(50)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -75,7 +75,6 @@ model Driver {
 model Vehicle {
   id                 Int      @id @default(autoincrement())
   registrationNumber String   @unique @db.VarChar(50)
-  fuelType           String?  @db.VarChar(50)
   capacityGallons    Int?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
@@ -96,7 +95,7 @@ model Inventory {
   id              Int      @id @default(autoincrement())
   locationId      Int
   productId       Int
-  quantityGallons Float    @default(0)
+  quantity        Float    @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -164,7 +163,7 @@ model Order {
   id               Int         @id @default(autoincrement())
   destinationId    Int
   productId        Int
-  quantityGallons  Float
+  quantity        Float
   status           OrderStatus @default(pending)
   assignedDriverId Int?
   assignedDate     DateTime?   @db.Date

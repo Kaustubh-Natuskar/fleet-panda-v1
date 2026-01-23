@@ -56,7 +56,7 @@ const create = async ({ vehicleId, latitude, longitude, recordedAt }) => {
 /**
  * Get GPS history for a vehicle
  */
-const getByVehicle = async (vehicleId, { from, to, limit = 100 }) => {
+const getByVehicle = async (vehicleId, { from, to }) => {
   vehicleId = parseInt(vehicleId, 10);
   // Verify vehicle exists
   const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
@@ -75,7 +75,6 @@ const getByVehicle = async (vehicleId, { from, to, limit = 100 }) => {
   return prisma.gpsLocation.findMany({
     where,
     orderBy: { recordedAt: 'desc' },
-    take: limit,
     include: {
       shift: {
         include: { driver: true },
@@ -88,7 +87,7 @@ const getByVehicle = async (vehicleId, { from, to, limit = 100 }) => {
  * Get GPS history for a driver
  * Returns all GPS updates from this driver's shifts
  */
-const getByDriver = async (driverId, { from, to, limit = 100 }) => {
+const getByDriver = async (driverId, { from, to }) => {
   driverId = parseInt(driverId, 10);
   // Verify driver exists
   const driver = await prisma.driver.findUnique({ where: { id: driverId } });
@@ -119,7 +118,6 @@ const getByDriver = async (driverId, { from, to, limit = 100 }) => {
   return prisma.gpsLocation.findMany({
     where,
     orderBy: { recordedAt: 'desc' },
-    take: limit,
     include: {
       vehicle: true,
       shift: true,

@@ -82,7 +82,7 @@ const router = express.Router();
  *                               type: string
  *                             product:
  *                               type: string
- *                             quantityGallons:
+ *                             quantity:
  *                               type: number
  *                             status:
  *                               type: string
