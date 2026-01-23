@@ -3,7 +3,7 @@
  * Tests that GPS requires active shift
  */
 
-jest.mock('../src/utils/prisma', () => ({
+jest.mock('../../src/utils/prisma', () => ({
   vehicle: {
     findUnique: jest.fn(),
   },
@@ -21,9 +21,9 @@ jest.mock('../src/utils/prisma', () => ({
   },
 }));
 
-const prisma = require('../src/utils/prisma');
-const gpsService = require('../src/services/gps.service');
-const { BadRequestError, NotFoundError } = require('../src/utils/errors');
+const prisma = require('../../src/utils/prisma');
+const gpsService = require('../../src/services/gps.service');
+const { BadRequestError, NotFoundError } = require('../../src/utils/errors');
 
 describe('GPS Service', () => {
   beforeEach(() => {

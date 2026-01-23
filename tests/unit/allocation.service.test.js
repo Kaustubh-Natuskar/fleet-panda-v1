@@ -3,7 +3,7 @@
  * Tests vehicle and driver allocation constraints
  */
 
-jest.mock('../src/utils/prisma', () => ({
+jest.mock('../../src/utils/prisma', () => ({
   vehicle: {
     findUnique: jest.fn(),
     findMany: jest.fn(),
@@ -25,9 +25,9 @@ jest.mock('../src/utils/prisma', () => ({
   },
 }));
 
-const prisma = require('../src/utils/prisma');
-const allocationService = require('../src/services/allocation.service');
-const { ConflictError, NotFoundError } = require('../src/utils/errors');
+const prisma = require('../../src/utils/prisma');
+const allocationService = require('../../src/services/allocation.service');
+const { ConflictError, NotFoundError } = require('../../src/utils/errors');
 
 describe('Allocation Service', () => {
   beforeEach(() => {

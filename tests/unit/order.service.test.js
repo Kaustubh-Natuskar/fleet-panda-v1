@@ -4,7 +4,7 @@
  */
 
 // Mock Prisma before importing services
-jest.mock('../src/utils/prisma', () => ({
+jest.mock('../../src/utils/prisma', () => ({
   order: {
     findUnique: jest.fn(),
     findMany: jest.fn(),
@@ -46,9 +46,9 @@ jest.mock('../src/utils/prisma', () => ({
   })),
 }));
 
-const prisma = require('../src/utils/prisma');
-const orderService = require('../src/services/order.service');
-const { BadRequestError, ConflictError, NotFoundError } = require('../src/utils/errors');
+const prisma = require('../../src/utils/prisma');
+const orderService = require('../../src/services/order.service');
+const { BadRequestError, ConflictError, NotFoundError } = require('../../src/utils/errors');
 
 describe('Order Service', () => {
   beforeEach(() => {

@@ -3,7 +3,7 @@
  * Tests critical business logic for shift lifecycle
  */
 
-jest.mock('../src/utils/prisma', () => ({
+jest.mock('../../src/utils/prisma', () => ({
   driver: {
     findUnique: jest.fn(),
   },
@@ -23,14 +23,14 @@ jest.mock('../src/utils/prisma', () => ({
 }));
 
 // Mock the allocation service
-jest.mock('../src/services/allocation.service', () => ({
+jest.mock('../../src/services/allocation.service', () => ({
   getByDriverAndDate: jest.fn(),
 }));
 
-const prisma = require('../src/utils/prisma');
-const allocationService = require('../src/services/allocation.service');
-const shiftService = require('../src/services/shift.service');
-const { BadRequestError, ConflictError, NotFoundError } = require('../src/utils/errors');
+const prisma = require('../../src/utils/prisma');
+const allocationService = require('../../src/services/allocation.service');
+const shiftService = require('../../src/services/shift.service');
+const { BadRequestError, ConflictError, NotFoundError } = require('../../src/utils/errors');
 
 describe('Shift Service', () => {
   beforeEach(() => {
