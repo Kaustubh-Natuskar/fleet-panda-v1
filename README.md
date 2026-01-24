@@ -2,6 +2,10 @@
 
 Real-time fleet, driver, and delivery tracking platform for FuelPanda fuel logistics operations.
 
+## Live Demo (AWS Lightsail)
+
+[http://65.2.172.118:3000/](http://65.2.172.118:3000/)
+
 ## Features
 
 - **Vehicle Management**: Track and manage fuel tanker fleet
@@ -38,8 +42,8 @@ docker-compose logs -f app
 
 ### Access Points
 
-| Service            | URL                            |
-| ------------------ | ------------------------------ |
+| Service            | URL                           |
+| ------------------ | ----------------------------- |
 | API                | http://base-url:3000          |
 | API Docs (Swagger) | http://base-url:3000/api-docs |
 | Health Check       | http://base-url:3000/health   |
@@ -244,5 +248,3 @@ npm test -- --coverage
 | 404  | Not found                                  |
 | 409  | Conflict (duplicate, constraint violation) |
 | 500  | Server error                               |
-
-
