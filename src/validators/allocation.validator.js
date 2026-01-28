@@ -1,16 +1,19 @@
 'use strict';
 
 const Joi = require('joi');
-
-// Custom validation for date (must be today or future)
-const today = new Date();
-today.setHours(0, 0, 0, 0);
+const { getTodayAtMidnight } = require('../utils/date-utils');
 
 const create = {
   body: Joi.object({
     vehicleId: Joi.number().integer().positive().required(),
     driverId: Joi.number().integer().positive().required(),
-    allocationDate: Joi.date().iso().min(today).required()
+    allocationDate: Joi.date().iso().required()
+      .custom((value, helpers) => {
+        if (value < getTodayAtMidnight()) {
+          return helpers.error('date.min');
+        }
+        return value;
+      })
       .messages({
         'date.min': 'Allocation date cannot be in the past',
       }),
@@ -24,7 +27,13 @@ const update = {
   body: Joi.object({
     vehicleId: Joi.number().integer().positive(),
     driverId: Joi.number().integer().positive(),
-    allocationDate: Joi.date().iso().min(today)
+    allocationDate: Joi.date().iso()
+      .custom((value, helpers) => {
+        if (value < getTodayAtMidnight()) {
+          return helpers.error('date.min');
+        }
+        return value;
+      })
       .messages({
         'date.min': 'Allocation date cannot be in the past',
       }),

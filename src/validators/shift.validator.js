@@ -1,15 +1,18 @@
 'use strict';
 
 const Joi = require('joi');
-
-// Custom validation for date (must be today or future)
-const today = new Date();
-today.setHours(0, 0, 0, 0);
+const { getTodayAtMidnight } = require('../utils/date-utils');
 
 const schedule = {
   body: Joi.object({
     driverId: Joi.number().integer().positive().required(),
-    shiftDate: Joi.date().iso().min(today).required()
+    shiftDate: Joi.date().iso().required()
+      .custom((value, helpers) => {
+        if (value < getTodayAtMidnight()) {
+          return helpers.error('date.min');
+        }
+        return value;
+      })
       .messages({
         'date.min': 'Shift date cannot be in the past',
       }),
