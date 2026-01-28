@@ -45,7 +45,9 @@ const validate = (schema) => {
       if (error) {
         errors.push(...error.details.map((d) => ({ field: d.path.join('.'), message: d.message })));
       } else {
-        req.query = value;
+        // req.query is read-only in Express 4.18+, mutate in place
+        Object.keys(req.query).forEach((key) => delete req.query[key]);
+        Object.assign(req.query, value);
       }
     }
 

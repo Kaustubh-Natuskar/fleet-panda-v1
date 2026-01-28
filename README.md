@@ -4,7 +4,7 @@ Real-time fleet, driver, and delivery tracking platform for FuelPanda fuel logis
 
 ## Live Demo (AWS Lightsail)
 
-[http://65.2.172.118:3000/](http://65.2.172.118:3000/)
+[http://65.2.172.118/](http://65.2.172.118/)
 
 ## Features
 
