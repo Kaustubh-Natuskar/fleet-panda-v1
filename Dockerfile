@@ -18,6 +18,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
 COPY prisma ./prisma
 COPY src ./src
+COPY tests ./tests
 
 # Copy frontend and documentation assets
 COPY public ./public
