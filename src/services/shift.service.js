@@ -84,14 +84,21 @@ const schedule = async ({ driverId, shiftDate }) => {
     );
   }
 
+  //check if driver have a active allocation for this date if yes then we can tag that allocation here else null
+  const allocation = await allocationService.getByDriverAndDate(driverId, date);
+
   return prisma.shift.create({
     data: {
       driverId,
       shiftDate: date,
       status: 'scheduled',
+      vehicleAllocationId: allocation && allocation.id ? allocation.id : null,
     },
     include: {
       driver: true,
+      vehicleAllocation: {
+        include: { vehicle: true },
+      },
     },
   });
 };
