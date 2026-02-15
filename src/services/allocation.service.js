@@ -67,6 +67,7 @@ const create = async ({ vehicleId, driverId, allocationDate }) => {
         vehicleId,
         driverId,
         allocationDate: date,
+        version: 0,
       },
       include: {
         vehicle: true,
@@ -93,8 +94,19 @@ const create = async ({ vehicleId, driverId, allocationDate }) => {
   }
 };
 
+/**
+ * Update allocation with optimistic locking
+ * Requires version field in request body
+ */
 const update = async (id, data) => {
-  const allocation = await getById(id);
+  await getById(id);
+
+  // Version is required for updates (optimistic locking)
+  if (data.version === undefined || data.version === null) {
+    throw new BadRequestError('Version field is required for updates. Fetch the current record first.');
+  }
+
+  const expectedVersion = parseInt(data.version, 10);
 
   // Check if there's an active shift using this allocation
   const activeShift = await prisma.shift.findFirst({
@@ -108,32 +120,62 @@ const update = async (id, data) => {
     throw new ConflictError('Cannot update allocation: there is an active shift using it');
   }
 
+  // Prepare update data (remove version from data, we handle it separately)
+  const { version, ...updateData } = data;
+
   // If updating date, format it
-  if (data.allocationDate) {
-    const date = new Date(data.allocationDate);
+  if (updateData.allocationDate) {
+    const date = new Date(updateData.allocationDate);
     date.setHours(0, 0, 0, 0);
-    data.allocationDate = date;
+    updateData.allocationDate = date;
   }
 
   try {
-    return await prisma.vehicleAllocation.update({
-      where: { id },
-      data,
-      include: {
-        vehicle: true,
-        driver: true,
-      },
+    return await prisma.$transaction(async (tx) => {
+      // Optimistic lock: update only if version matches
+      const updated = await tx.vehicleAllocation.updateMany({
+        where: {
+          id,
+          version: expectedVersion,
+        },
+        data: {
+          ...updateData,
+          version: { increment: 1 },
+        },
+      });
+
+      if (updated.count === 0) {
+        // Check if record exists but version changed
+        const current = await tx.vehicleAllocation.findUnique({ where: { id } });
+        if (current && current.version !== expectedVersion) {
+          throw new ConflictError(
+            `Allocation was modified by another user. ` +
+            `Expected version ${expectedVersion}, current version is ${current.version}. ` +
+            `Please refresh and try again.`
+          );
+        }
+        throw new NotFoundError(`Allocation with ID ${id} not found`);
+      }
+
+      // Return the updated record with relations
+      return tx.vehicleAllocation.findUnique({
+        where: { id },
+        include: {
+          vehicle: true,
+          driver: true,
+        },
+      });
     });
   } catch (error) {
     if (error.code === 'P2002') {
-      throw new ConflictError('Vehicle is already allocated for this date');
+      throw new ConflictError('Vehicle or driver is already allocated for this date');
     }
     throw error;
   }
 };
 
 const remove = async (id) => {
-  const allocation = await getById(id);
+  await getById(id);
 
   // Check if there are shifts using this allocation
   const shiftCount = await prisma.shift.count({

@@ -37,7 +37,8 @@ const update = {
       .messages({
         'date.min': 'Allocation date cannot be in the past',
       }),
-  }).min(1),
+    version: Joi.number().integer().min(0).required(),
+  }).min(2),  // At least version + one field to update
 };
 
 const getById = {

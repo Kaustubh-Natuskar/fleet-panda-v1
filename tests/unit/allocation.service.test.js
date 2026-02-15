@@ -19,17 +19,19 @@ jest.mock('../../src/utils/prisma', () => ({
     findMany: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
+    updateMany: jest.fn(),
     delete: jest.fn(),
   },
   shift: {
     findFirst: jest.fn(),
     count: jest.fn(),
   },
+  $transaction: jest.fn(),
 }));
 
 const prisma = require('../../src/utils/prisma');
 const allocationService = require('../../src/services/allocation.service');
-const { ConflictError, NotFoundError } = require('../../src/utils/errors');
+const { ConflictError, NotFoundError, BadRequestError } = require('../../src/utils/errors');
 
 describe('Allocation Service', () => {
   beforeEach(() => {
@@ -149,6 +151,87 @@ describe('Allocation Service', () => {
 
       expect(result).toHaveLength(2);
       expect(result.map((v) => v.id)).toEqual([2, 3]);
+    });
+  });
+
+  describe('update with optimistic locking', () => {
+    const mockAllocation = {
+      id: 1,
+      vehicleId: 1,
+      driverId: 1,
+      version: 3,
+      vehicle: { id: 1 },
+      driver: { id: 1 },
+    };
+
+    it('should reject update without version field', async () => {
+      prisma.vehicleAllocation.findUnique.mockResolvedValue(mockAllocation);
+      prisma.shift.findFirst.mockResolvedValue(null);
+
+      await expect(
+        allocationService.update(1, { driverId: 2 })
+      ).rejects.toThrow(BadRequestError);
+    });
+
+    it('should reject update when version does not match', async () => {
+      prisma.vehicleAllocation.findUnique.mockResolvedValue(mockAllocation);
+      prisma.shift.findFirst.mockResolvedValue(null);
+
+      const mockTx = {
+        vehicleAllocation: {
+          updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+          findUnique: jest.fn().mockResolvedValue({ id: 1, version: 5 }),
+        },
+      };
+      prisma.$transaction.mockImplementation((cb) => cb(mockTx));
+
+      await expect(
+        allocationService.update(1, { driverId: 2, version: 3 })
+      ).rejects.toThrow(ConflictError);
+    });
+
+    it('should succeed when version matches', async () => {
+      const updatedAllocation = {
+        id: 1,
+        vehicleId: 1,
+        driverId: 2,
+        version: 4,
+        vehicle: { id: 1 },
+        driver: { id: 2 },
+      };
+
+      prisma.vehicleAllocation.findUnique.mockResolvedValue(mockAllocation);
+      prisma.shift.findFirst.mockResolvedValue(null);
+
+      const mockTx = {
+        vehicleAllocation: {
+          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          findUnique: jest.fn().mockResolvedValue(updatedAllocation),
+        },
+      };
+      prisma.$transaction.mockImplementation((cb) => cb(mockTx));
+
+      const result = await allocationService.update(1, { driverId: 2, version: 3 });
+
+      expect(result.version).toBe(4);
+      expect(mockTx.vehicleAllocation.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 1, version: 3 },
+          data: expect.objectContaining({
+            driverId: 2,
+            version: { increment: 1 },
+          }),
+        })
+      );
+    });
+
+    it('should reject update when active shift exists', async () => {
+      prisma.vehicleAllocation.findUnique.mockResolvedValue(mockAllocation);
+      prisma.shift.findFirst.mockResolvedValue({ id: 1, status: 'active' });
+
+      await expect(
+        allocationService.update(1, { driverId: 2, version: 3 })
+      ).rejects.toThrow(ConflictError);
     });
   });
 

@@ -253,6 +253,7 @@ router.post('/:id/assign', parseId(), validate(orderValidator.assign), orderCont
  *       - Requires: active shift for the driver
  *       - Order must be in 'assigned' status
  *       - Creates an order attempt record
+ *       - Uses atomic conditional update to prevent race conditions (concurrent calls return 409)
  *     tags: [Orders]
  *     parameters:
  *       - in: path
@@ -280,7 +281,7 @@ router.post('/:id/assign', parseId(), validate(orderValidator.assign), orderCont
  *       404:
  *         description: Order not found
  *       409:
- *         description: Order not in assigned status
+ *         description: Order not in assigned status or was already started by a concurrent request
  */
 router.post('/:id/start', parseId(), validate(orderValidator.startOrder), orderController.startOrder);
 
@@ -294,6 +295,8 @@ router.post('/:id/start', parseId(), validate(orderValidator.startOrder), orderC
  *       - Requires: active shift
  *       - Order must be in 'in_progress' status
  *       - **Automatically increases destination inventory** by the order quantity
+ *       - Uses atomic conditional update to prevent double-completion (concurrent calls return 409)
+ *       - Inventory is only incremented once, even under concurrent requests
  *     tags: [Orders]
  *     parameters:
  *       - in: path
@@ -321,7 +324,7 @@ router.post('/:id/start', parseId(), validate(orderValidator.startOrder), orderC
  *       404:
  *         description: Order not found
  *       409:
- *         description: Order not in in_progress status
+ *         description: Order not in in_progress status or was already completed by a concurrent request
  */
 router.post('/:id/complete', parseId(), validate(orderValidator.completeOrder), orderController.completeOrder);
 
@@ -336,6 +339,7 @@ router.post('/:id/complete', parseId(), validate(orderValidator.completeOrder), 
  *       - Order must be in 'assigned' or 'in_progress' status
  *       - **Does NOT update inventory**
  *       - Reason is required (e.g., "Pump malfunction", "Customer refused")
+ *       - Uses atomic conditional update to prevent race conditions (concurrent calls return 409)
  *     tags: [Orders]
  *     parameters:
  *       - in: path
@@ -367,7 +371,7 @@ router.post('/:id/complete', parseId(), validate(orderValidator.completeOrder), 
  *       404:
  *         description: Order not found
  *       409:
- *         description: Order not in valid status for failing
+ *         description: Order status has already changed (concurrent request or invalid status)
  */
 router.post('/:id/fail', parseId(), validate(orderValidator.failOrder), orderController.failOrder);
 

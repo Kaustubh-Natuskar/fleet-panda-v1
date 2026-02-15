@@ -171,30 +171,26 @@ const startOrder = async (id, driverId) => {
     throw new BadRequestError('This order is not assigned to you');
   }
 
-  if (order.status !== 'assigned') {
-    throw new ConflictError(
-      `Cannot start order: status is '${order.status}'. Only assigned orders can be started.`
-    );
-  }
-
   // Check driver has active shift
   const activeShift = await shiftService.getActiveShiftForDriver(driverId);
   if (!activeShift) {
     throw new BadRequestError('Cannot start order: you do not have an active shift');
   }
 
-  // Use transaction to update order and create attempt
   return prisma.$transaction(async (tx) => {
-    // Update order status
-    const updatedOrder = await tx.order.update({
-      where: { id },
-      data: { status: 'in_progress' },
-      include: {
-        destination: true,
-        product: true,
-        assignedDriver: true,
+    // Atomic check-and-update: only succeeds if status is still 'assigned'
+    const updated = await tx.order.updateMany({
+      where: {
+        id,
+        status: 'assigned',
+        assignedDriverId: driverId,
       },
+      data: { status: 'in_progress' },
     });
+
+    if (updated.count === 0) {
+      throw new ConflictError('Order is not in assigned status or was already started');
+    }
 
     // Create order attempt record
     await tx.orderAttempt.create({
@@ -205,7 +201,15 @@ const startOrder = async (id, driverId) => {
       },
     });
 
-    return updatedOrder;
+    // Return updated order
+    return tx.order.findUnique({
+      where: { id },
+      include: {
+        destination: true,
+        product: true,
+        assignedDriver: true,
+      },
+    });
   });
 };
 
@@ -219,59 +223,47 @@ const completeOrder = async (id, driverId) => {
   driverId = parseInt(driverId, 10);
   const order = await getById(id);
 
-  // Verify order is assigned to this driver
+  // Verify order is assigned to this driver (can stay outside - won't change)
   if (order.assignedDriverId !== driverId) {
     throw new BadRequestError('This order is not assigned to you');
   }
 
-  if (order.status !== 'in_progress') {
-    throw new ConflictError(
-      `Cannot complete order: status is '${order.status}'. Only in_progress orders can be completed.`
-    );
-  }
-
-  // Get active shift
+  // Get active shift (can stay outside - just for the shiftId)
   const activeShift = await shiftService.getActiveShiftForDriver(driverId);
   if (!activeShift) {
     throw new BadRequestError('Cannot complete order: you do not have an active shift');
   }
 
-  // Find the in_progress attempt
-  const attempt = await prisma.orderAttempt.findFirst({
-    where: {
-      orderId: id,
-      shiftId: activeShift.id,
-      status: 'in_progress',
-    },
-  });
-
-  if (!attempt) {
-    throw new BadRequestError('No active attempt found for this order');
-  }
-
-  // Transaction: update order, attempt, and inventory atomically
+  // Transaction with atomic check-and-update
   return prisma.$transaction(async (tx) => {
-    // Update order status
-    const updatedOrder = await tx.order.update({
-      where: { id },
-      data: { status: 'completed' },
-      include: {
-        destination: true,
-        product: true,
-        assignedDriver: true,
+    // Atomic update - only succeeds if status is still 'in_progress'
+    const updated = await tx.order.updateMany({
+      where: {
+        id,
+        status: 'in_progress',
+        assignedDriverId: driverId,
       },
+      data: { status: 'completed' },
     });
 
-    // Update attempt
-    await tx.orderAttempt.update({
-      where: { id: attempt.id },
+    if (updated.count === 0) {
+      throw new ConflictError('Order is not in progress or was already completed');
+    }
+
+    // Update or create attempt record
+    await tx.orderAttempt.updateMany({
+      where: {
+        orderId: id,
+        shiftId: activeShift.id,
+        status: 'in_progress',
+      },
       data: {
         status: 'completed',
         completedAt: new Date(),
       },
     });
 
-    // Increase destination inventory
+    // Increment inventory
     await tx.inventory.upsert({
       where: {
         locationId_productId: {
@@ -289,7 +281,15 @@ const completeOrder = async (id, driverId) => {
       },
     });
 
-    return updatedOrder;
+    // Fetch and return the updated order
+    return tx.order.findUnique({
+      where: { id },
+      include: {
+        destination: true,
+        product: true,
+        assignedDriver: true,
+      },
+    });
   });
 };
 
@@ -308,51 +308,43 @@ const failOrder = async (id, driverId, reason) => {
     throw new BadRequestError('This order is not assigned to you');
   }
 
-  if (order.status !== 'assigned' && order.status !== 'in_progress') {
-    throw new ConflictError(
-      `Cannot fail order: status is '${order.status}'. Only assigned or in_progress orders can be failed.`
-    );
-  }
-
   // Get active shift
   const activeShift = await shiftService.getActiveShiftForDriver(driverId);
   if (!activeShift) {
     throw new BadRequestError('Cannot fail order: you do not have an active shift');
   }
 
-  // Find existing attempt or create one
-  let attempt = await prisma.orderAttempt.findFirst({
-    where: {
-      orderId: id,
-      shiftId: activeShift.id,
-      status: 'in_progress',
-    },
-  });
-
   return prisma.$transaction(async (tx) => {
-    // Update order status
-    const updatedOrder = await tx.order.update({
-      where: { id },
+    // Atomic check-and-update: only succeeds if status is 'assigned' or 'in_progress'
+    const updated = await tx.order.updateMany({
+      where: {
+        id,
+        status: { in: ['assigned', 'in_progress'] },
+        assignedDriverId: driverId,
+      },
       data: { status: 'failed' },
-      include: {
-        destination: true,
-        product: true,
-        assignedDriver: true,
+    });
+
+    if (updated.count === 0) {
+      throw new ConflictError('Order cannot be failed: status has already changed');
+    }
+
+    // Try to update existing in_progress attempt, otherwise create a new failed attempt
+    const attemptUpdated = await tx.orderAttempt.updateMany({
+      where: {
+        orderId: id,
+        shiftId: activeShift.id,
+        status: 'in_progress',
+      },
+      data: {
+        status: 'failed',
+        failureReason: reason,
+        completedAt: new Date(),
       },
     });
 
-    if (attempt) {
-      // Update existing attempt
-      await tx.orderAttempt.update({
-        where: { id: attempt.id },
-        data: {
-          status: 'failed',
-          failureReason: reason,
-          completedAt: new Date(),
-        },
-      });
-    } else {
-      // Create failed attempt record
+    if (attemptUpdated.count === 0) {
+      // No in_progress attempt found, create a failed attempt record
       await tx.orderAttempt.create({
         data: {
           orderId: id,
@@ -364,7 +356,15 @@ const failOrder = async (id, driverId, reason) => {
       });
     }
 
-    return updatedOrder;
+    // Fetch and return the updated order
+    return tx.order.findUnique({
+      where: { id },
+      include: {
+        destination: true,
+        product: true,
+        assignedDriver: true,
+      },
+    });
   });
 };
 

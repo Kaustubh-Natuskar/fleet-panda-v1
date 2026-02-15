@@ -234,6 +234,29 @@ describe('Request Validation', () => {
     });
   });
 
+  describe('PUT /api/allocations/:id', () => {
+    it('should reject update without version field', async () => {
+      const res = await request(app)
+        .put('/api/allocations/1')
+        .send({
+          driverId: 2,
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toMatch(/version/i);
+    });
+
+    it('should reject update with only version field (no data to update)', async () => {
+      const res = await request(app)
+        .put('/api/allocations/1')
+        .send({
+          version: 0,
+        });
+
+      expect(res.status).toBe(400);
+    });
+  });
+
   describe('POST /api/shifts/start', () => {
     it('should reject missing driverId', async () => {
       const res = await request(app)

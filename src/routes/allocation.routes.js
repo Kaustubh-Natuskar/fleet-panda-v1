@@ -28,6 +28,10 @@ const router = express.Router();
  *           type: string
  *           format: date
  *           example: '2026-01-21'
+ *         version:
+ *           type: integer
+ *           description: Version number for optimistic locking. Must be included in update requests.
+ *           example: 0
  *         vehicle:
  *           $ref: '#/components/schemas/Vehicle'
  *         driver:
@@ -174,8 +178,11 @@ router.post('/', validate(allocationValidator.create), allocationController.crea
  * @swagger
  * /api/allocations/{id}:
  *   put:
- *     summary: Update an allocation
- *     description: Cannot update if there's an active shift using this allocation
+ *     summary: Update an allocation (requires version for optimistic locking)
+ *     description: |
+ *       Updates an allocation. Requires the current version number for optimistic locking.
+ *       Cannot update if there's an active shift using this allocation.
+ *       If the version doesn't match (another user modified it), returns 409 Conflict.
  *     tags: [Allocations]
  *     parameters:
  *       - in: path
@@ -189,6 +196,8 @@ router.post('/', validate(allocationValidator.create), allocationController.crea
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - version
  *             properties:
  *               vehicleId:
  *                 type: integer
@@ -197,13 +206,16 @@ router.post('/', validate(allocationValidator.create), allocationController.crea
  *               allocationDate:
  *                 type: string
  *                 format: date
+ *               version:
+ *                 type: integer
+ *                 description: Current version of the record (required for optimistic locking)
  *     responses:
  *       200:
  *         description: Allocation updated
  *       404:
  *         description: Allocation not found
  *       409:
- *         description: Active shift exists or vehicle already allocated
+ *         description: Version conflict, active shift exists, or vehicle already allocated
  */
 router.put('/:id', parseId(), validate(allocationValidator.update), allocationController.update);
 

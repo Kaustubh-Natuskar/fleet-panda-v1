@@ -79,8 +79,9 @@ model Vehicle {
   updatedAt          DateTime @updatedAt
 
   // Relations
-  allocations  VehicleAllocation[]
-  gpsLocations GpsLocation[]
+  allocations    VehicleAllocation[]
+  gpsLocations   GpsLocation[]
+  latestLocation VehicleLatestLocation?
 
   @@map("vehicles")
 }
@@ -113,6 +114,7 @@ model VehicleAllocation {
   vehicleId      Int
   driverId       Int
   allocationDate DateTime @db.Date
+  version        Int      @default(0)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -141,10 +143,11 @@ model Shift {
   updatedAt           DateTime    @updatedAt
 
   // Relations
-  driver             Driver             @relation(fields: [driverId], references: [id])
-  vehicleAllocation  VehicleAllocation? @relation(fields: [vehicleAllocationId], references: [id])
+  driver             Driver                  @relation(fields: [driverId], references: [id])
+  vehicleAllocation  VehicleAllocation?      @relation(fields: [vehicleAllocationId], references: [id])
   gpsLocations       GpsLocation[]
   orderAttempts      OrderAttempt[]
+  latestLocations    VehicleLatestLocation[]
 
   // One shift per driver per day
   @@unique([driverId, shiftDate])
@@ -229,4 +232,21 @@ model GpsLocation {
   @@index([vehicleId, recordedAt])
   @@index([shiftId])
   @@map("gps_locations")
+}
+
+/// Cache table for latest vehicle location - enables fast fleet status queries
+model VehicleLatestLocation {
+  vehicleId  Int      @id // PK = one row per vehicle
+  latitude   Float
+  longitude  Float
+  recordedAt DateTime
+  shiftId    Int?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id])
+  shift   Shift?  @relation(fields: [shiftId], references: [id])
+
+  @@map("vehicle_latest_locations")
 }
