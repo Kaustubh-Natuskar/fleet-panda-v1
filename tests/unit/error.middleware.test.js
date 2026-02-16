@@ -129,6 +129,21 @@ describe('Error Middleware', () => {
         },
       });
     });
+
+    it('should handle P2034 (write conflict / deadlock) with 409 status', () => {
+      const error = { code: 'P2034', message: 'Transaction failed due to a write conflict or a deadlock' };
+
+      errorMiddleware(error, mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(409);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        error: {
+          code: 'CONFLICT',
+          message: 'Write conflict or deadlock detected. Please retry your request.',
+        },
+      });
+    });
   });
 
   describe('JSON parsing error handling', () => {
