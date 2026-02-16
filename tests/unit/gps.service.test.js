@@ -18,9 +18,14 @@ jest.mock('../../src/utils/prisma', () => ({
     findMany: jest.fn(),
     findFirst: jest.fn(),
   },
+  vehicleLatestLocation: {
+    upsert: jest.fn(),
+    findMany: jest.fn(),
+  },
   driver: {
     findUnique: jest.fn(),
   },
+  $transaction: jest.fn(),
 }));
 
 const prisma = require('../../src/utils/prisma');
@@ -53,7 +58,8 @@ describe('GPS Service', () => {
 
       prisma.vehicle.findUnique.mockResolvedValue(mockVehicle);
       prisma.shift.findFirst.mockResolvedValue(mockShift);
-      prisma.gpsLocation.create.mockResolvedValue(mockGps);
+      // $transaction receives an array of promises, returns array of results
+      prisma.$transaction.mockResolvedValue([mockGps, {}]);
 
       const result = await gpsService.create({
         vehicleId: 1,
@@ -63,6 +69,8 @@ describe('GPS Service', () => {
 
       expect(result.shiftId).toBe(1);
       expect(result.latitude).toBe(29.7604);
+      // Verify transaction was called (batch transaction with gpsLocation.create + vehicleLatestLocation.upsert)
+      expect(prisma.$transaction).toHaveBeenCalled();
     });
 
     it('should reject GPS if vehicle has no active shift', async () => {
@@ -99,14 +107,17 @@ describe('GPS Service', () => {
 
       prisma.vehicle.findUnique.mockResolvedValue(mockVehicle);
       prisma.shift.findFirst.mockResolvedValue(mockShift);
-      prisma.gpsLocation.create.mockResolvedValue({
-        id: 1,
-        vehicleId: 1,
-        shiftId: 1,
-        latitude: 29.7604,
-        longitude: -95.3698,
-        recordedAt: customTime,
-      });
+      prisma.$transaction.mockResolvedValue([
+        {
+          id: 1,
+          vehicleId: 1,
+          shiftId: 1,
+          latitude: 29.7604,
+          longitude: -95.3698,
+          recordedAt: customTime,
+        },
+        {},
+      ]);
 
       const result = await gpsService.create({
         vehicleId: 1,
@@ -115,9 +126,20 @@ describe('GPS Service', () => {
         recordedAt: customTime,
       });
 
+      // Verify the transaction was called with both create and upsert
+      expect(prisma.$transaction).toHaveBeenCalled();
+      // Verify gpsLocation.create was called with the custom timestamp
       expect(prisma.gpsLocation.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
+            recordedAt: customTime,
+          }),
+        })
+      );
+      // Verify vehicleLatestLocation.upsert was called with the custom timestamp
+      expect(prisma.vehicleLatestLocation.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          update: expect.objectContaining({
             recordedAt: customTime,
           }),
         })

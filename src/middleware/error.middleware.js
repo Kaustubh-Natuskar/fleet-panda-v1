@@ -58,6 +58,17 @@ const errorMiddleware = (err, req, res, next) => {
     });
   }
 
+  // Handle Prisma transaction write conflict / deadlock
+  if (err.code === 'P2034') {
+    return res.status(409).json({
+      success: false,
+      error: {
+        code: 'CONFLICT',
+        message: 'Write conflict or deadlock detected. Please retry your request.',
+      },
+    });
+  }
+
   // Handle JSON parsing errors
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
     return res.status(400).json({
